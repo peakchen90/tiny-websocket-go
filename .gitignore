@@ -1,0 +1,7 @@
+.idea
+.vscode
+.DS_Store
+.temp/
+temp/
+*.log
+/tiny-websocket-go*
