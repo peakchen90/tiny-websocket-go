@@ -3,7 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/bxcodec/faker"
+	"github.com/bxcodec/faker/v3"
 )
 
 type Message struct {
