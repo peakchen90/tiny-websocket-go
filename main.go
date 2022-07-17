@@ -44,7 +44,7 @@ func main() {
 			data := termimg.EscapeData{}
 			render, _ := termimg.PresetBitmapBlock().Renderer()
 			render.Escapes(&data, img, 0)
-			receive(fmt.Sprintf("%s: \n%s", senderNick, data.Value()))
+			go receive(fmt.Sprintf("%s: \n%s", senderNick, data.Value()))
 		} else {
 			msg := Message{}
 			err := json.Unmarshal(data, &msg)

@@ -48,7 +48,7 @@ type Socket struct {
 	opcode             Opcode     // 操作码
 	masked             bool       // 是否使用掩码
 	maskingKey         MaskingKey // 掩码key
-	payloadLength      uint64     // 当前帧数据载荷长度
+	payloadLength      uint64     // 当前帧数据（完整分片）载荷长度
 	totalPayloadLength uint64     // 数据载荷总长度
 }
 
@@ -111,7 +111,7 @@ func (s *Socket) receiveHeader() {
 func (s *Socket) receiveData() {
 	data := make(Buffer, 0)
 	if s.payloadLength > 0 {
-		if s.bufferedBytes < s.totalPayloadLength { // 等待缓冲区分段读取完成
+		if s.bufferedBytes < s.payloadLength { // 等待缓冲区分段读取完成（非分片）
 			s.isContinueReceiveData = true
 			return
 		} else {
