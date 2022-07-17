@@ -12,10 +12,13 @@ import (
 	"strings"
 )
 
-type Event int
-type Opcode byte
-type MaskingKey [4]byte
-type Buffer []byte
+type (
+	Event      uint8
+	Opcode     uint8
+	MaskingKey [4]byte
+	Buffer     []byte
+)
+
 type Header struct {
 	method     string
 	version    string
@@ -26,7 +29,7 @@ type Header struct {
 
 const MagicGuid = "258EAFA5-E914-47DA-95CA-C5AB0DC85B11"
 const (
-	EventMessage = iota
+	EventMessage Event = iota
 	EventClose
 	EventError
 	EventPing
@@ -123,10 +126,7 @@ func BuildFrame(data Buffer, opcode Opcode, masked bool, fin bool) Buffer {
 			byte(rand.Intn(255)),
 			byte(rand.Intn(255)),
 		}
-		buffer[offset-4] = maskingKey[0]
-		buffer[offset-3] = maskingKey[1]
-		buffer[offset-2] = maskingKey[2]
-		buffer[offset-1] = maskingKey[3]
+		copy(buffer[offset-4:offset], maskingKey[:])
 		Mask(data, maskingKey)
 		buffer = append(buffer, data...)
 	} else {

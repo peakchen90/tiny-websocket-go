@@ -4,4 +4,4 @@
 .temp/
 temp/
 *.log
-/tiny-websocket-go*
+/websocket*

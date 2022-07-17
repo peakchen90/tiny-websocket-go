@@ -1,9 +1,12 @@
 package main
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"github.com/bxcodec/faker/v3"
+	"github.com/shabbyrobe/termimg"
+	"image/png"
 )
 
 type Message struct {
@@ -33,7 +36,15 @@ func main() {
 		}
 
 		if binary {
-			//receive(fmt.Sprintf("%s: %s", msg.Username, msg.Data))
+			nickLength := int(data[0])
+			senderNick := string(data[1 : nickLength+1])
+			binaryData := data[nickLength+1:]
+
+			img, _ := png.Decode(bytes.NewReader(binaryData))
+			data := termimg.EscapeData{}
+			render, _ := termimg.PresetBitmapBlock().Renderer()
+			render.Escapes(&data, img, 0)
+			receive(fmt.Sprintf("%s: \n%s", senderNick, data.Value()))
 		} else {
 			msg := Message{}
 			err := json.Unmarshal(data, &msg)

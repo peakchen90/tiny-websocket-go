@@ -132,12 +132,12 @@ func (w *WebSocketClient) Hold() (unHold func()) {
 }
 
 func (w *WebSocketClient) polling() {
+	buf := make(Buffer, 65535) // 16 bits (约 64kb)
 	for {
 		if w.isClosed {
 			break
 		}
 
-		buf := make(Buffer, 65535) // 16 bits (约 64kb)
 		size, err := w.conn.Read(buf)
 		if err != nil {
 			w.Emit(EventError, err, nil, false)

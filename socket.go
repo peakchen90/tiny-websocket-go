@@ -83,7 +83,10 @@ func (s *Socket) receiveHeader() {
 
 	buf := s.consume(2)
 	s.fin = (buf[0] & 0b10000000) == 0b10000000
-	s.opcode = Opcode(buf[0] & 0b00001111)
+	opcode := Opcode(buf[0] & 0b00001111)
+	if opcode != 0x00 { // 如果是分片传输，使用之前的 opcode
+		s.opcode = opcode
+	}
 	s.masked = (buf[1] & 0b10000000) == 0b10000000
 
 	s.payloadLength = uint64(buf[1] & 0b01111111)
@@ -101,7 +104,7 @@ func (s *Socket) receiveHeader() {
 
 	if s.masked {
 		buf = s.consume(4)
-		s.maskingKey = MaskingKey{buf[0], buf[1], buf[2], buf[3]}
+		copy(s.maskingKey[:], buf)
 	}
 }
 
