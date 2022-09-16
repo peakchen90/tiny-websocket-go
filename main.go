@@ -7,6 +7,7 @@ import (
 	"github.com/bxcodec/faker/v3"
 	"github.com/shabbyrobe/termimg"
 	"image/png"
+	"log"
 )
 
 type Message struct {
@@ -15,8 +16,13 @@ type Message struct {
 	Username string `json:"username"`
 }
 
-func receive(message string) {
-	fmt.Println(message)
+func receive(msg <-chan string) {
+	for {
+		select {
+		case data := <-msg:
+			fmt.Println(data)
+		}
+	}
 }
 
 func main() {
@@ -28,6 +34,9 @@ func main() {
 
 	joinMsg, _ := json.Marshal(Message{"join", nick, nick})
 	client.Send(false, joinMsg)
+
+	message := make(chan string)
+	go receive(message)
 
 	// listen message
 	client.On(EventMessage, func(err error, data Buffer, binary bool) {
@@ -43,8 +52,12 @@ func main() {
 			img, _ := png.Decode(bytes.NewReader(binaryData))
 			data := termimg.EscapeData{}
 			render, _ := termimg.PresetBitmapBlock().Renderer()
-			render.Escapes(&data, img, 0)
-			go receive(fmt.Sprintf("%s: \n%s", senderNick, data.Value()))
+			err := render.Escapes(&data, img, 0)
+			if err != nil {
+				log.Fatalln(err)
+			}
+			message <- fmt.Sprintf("%s: \n", senderNick)
+			message <- string(data.Value())
 		} else {
 			msg := Message{}
 			err := json.Unmarshal(data, &msg)
@@ -54,11 +67,11 @@ func main() {
 
 			switch msg.Type {
 			case "join":
-				receive(fmt.Sprintf("%s 已加入", msg.Data))
+				message <- fmt.Sprintf("%s 已加入", msg.Data)
 			case "leave":
-				receive(fmt.Sprintf("%s 已离开", msg.Data))
+				message <- fmt.Sprintf("%s 已离开", msg.Data)
 			case "message":
-				receive(fmt.Sprintf("%s: %s", msg.Username, msg.Data))
+				message <- fmt.Sprintf("%s: %s", msg.Username, msg.Data)
 			}
 		}
 	})
