@@ -132,7 +132,7 @@ func (w *WebSocketClient) Hold() (unHold func()) {
 }
 
 func (w *WebSocketClient) polling() {
-	buf := make(Buffer, 65335) // 16 bits (约 64kb)
+	buf := make(Buffer, 65335-4) // 16 bits length (约 64kb)
 
 	for {
 		if w.isClosed {
