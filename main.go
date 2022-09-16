@@ -61,8 +61,7 @@ func main() {
 				return
 			}
 			message <- fmt.Sprintf("%s: \n", senderNick)
-			message <- string(data.Value())
-			message <- string("\033[0m") // 恢复 ANSI 默认颜色
+			message <- string(data.Value()) + "\033[0m" // 恢复 ANSI 默认颜色
 		} else {
 			msg := Message{}
 			err := json.Unmarshal(data, &msg)
