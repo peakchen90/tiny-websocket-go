@@ -7,7 +7,6 @@ import (
 	"github.com/bxcodec/faker/v3"
 	"github.com/shabbyrobe/termimg"
 	"image/png"
-	"log"
 )
 
 type Message struct {
@@ -49,15 +48,21 @@ func main() {
 			senderNick := string(data[1 : nickLength+1])
 			binaryData := data[nickLength+1:]
 
-			img, _ := png.Decode(bytes.NewReader(binaryData))
+			img, err := png.Decode(bytes.NewReader(binaryData))
+			if err != nil {
+				fmt.Println("Error: ", err)
+				return
+			}
 			data := termimg.EscapeData{}
 			render, _ := termimg.PresetBitmapBlock().Renderer()
-			err := render.Escapes(&data, img, 0)
+			err = render.Escapes(&data, img, 0)
 			if err != nil {
-				log.Fatalln(err)
+				fmt.Println("Error: ", err)
+				return
 			}
 			message <- fmt.Sprintf("%s: \n", senderNick)
 			message <- string(data.Value())
+			message <- string("\033[0m") // 恢复 ANSI 默认颜色
 		} else {
 			msg := Message{}
 			err := json.Unmarshal(data, &msg)
